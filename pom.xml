@@ -7,8 +7,8 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>coderunner</name>
-  <url>http://maven.apache.org</url>
+  <name>CloudMine Coderunner SDK</name>
+  <url>http://cloudmine.me</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,29 +27,5 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>1.8.5</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-integration</artifactId>
-      <version>1.2.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.avh4.util</groupId>
-      <artifactId>imagecomparison</artifactId>
-      <version>0.0.2</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <dependencies />
 </project>
