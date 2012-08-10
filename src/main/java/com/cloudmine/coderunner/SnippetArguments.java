@@ -1,6 +1,7 @@
 package com.cloudmine.coderunner;
 
 import com.cloudmine.api.CMObject;
+import com.cloudmine.api.CMSessionToken;
 import com.cloudmine.api.exceptions.CloudMineException;
 import com.cloudmine.api.exceptions.ConversionException;
 import com.cloudmine.api.rest.JsonUtilities;
@@ -21,6 +22,8 @@ public class SnippetArguments {
     private static final Logger LOG = LoggerFactory.getLogger(SnippetArguments.class);
     public static final String DATA_KEY = "data";
     public static final String PARAMS_KEY = "params";
+    public static final String SESSION_TOKEN_KEY = "session_token";
+    public static final String REQUEST_KEY = "request";
     private SnippetResponseConfiguration responseConfiguration;
     private Map<String, String> arguments;
 
@@ -68,6 +71,20 @@ public class SnippetArguments {
     }
 
     /**
+     * Attempts to return the session token. If there isn't one, {@link CMSessionToken.FAILED} is returned
+     * @return
+     */
+    public CMSessionToken getSessionToken() {
+        String sessionTokenJson = arguments.get(SESSION_TOKEN_KEY);
+
+        try {
+            return new CMSessionToken(sessionTokenJson);
+        } catch(ConversionException ce) {
+            return CMSessionToken.FAILED;
+        }
+    }
+
+    /**
      * Get the success part of the data
      * @return
      */
@@ -78,6 +95,13 @@ public class SnippetArguments {
                 "" :
                 success;
 
+    }
+
+    public String getRequestDataTransportableRepresentation() {
+        String input = arguments.get(REQUEST_KEY);
+        return input == null ?
+                "" :
+                input;
     }
 
     /**
