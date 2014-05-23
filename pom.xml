@@ -14,6 +14,14 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+    <repositories>
+        <repository>
+            <id>cloudmine-releases</id>
+            <url>https://github.com/cloudmine/maven/raw/master/releases</url>
+        </repository>
+    </repositories>
+
+
   <build>
     <plugins>
       <plugin>
@@ -41,7 +49,7 @@
       <dependency>
           <groupId>com.cloudmine.api</groupId>
           <artifactId>cloudmine-javasdk</artifactId>
-          <version>0.3-SNAPSHOT</version>
+          <version>[0.5.0,)</version>
       </dependency>
       <dependency>
           <groupId>commons-io</groupId>
