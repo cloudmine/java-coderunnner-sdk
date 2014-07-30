@@ -4,7 +4,7 @@
 
   <groupId>com.cloudmine</groupId>
   <artifactId>coderunner</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <packaging>jar</packaging>
 
   <name>CloudMine Coderunner SDK</name>
@@ -49,7 +49,7 @@
       <dependency>
           <groupId>com.cloudmine.api</groupId>
           <artifactId>cloudmine-javasdk</artifactId>
-          <version>[0.5.0,)</version>
+          <version>[0.6.3,)</version>
       </dependency>
       <dependency>
           <groupId>commons-io</groupId>
