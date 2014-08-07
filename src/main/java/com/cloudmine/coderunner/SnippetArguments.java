@@ -2,9 +2,11 @@ package com.cloudmine.coderunner;
 
 import com.cloudmine.api.CMObject;
 import com.cloudmine.api.CMSessionToken;
+import com.cloudmine.api.SimpleCMObject;
 import com.cloudmine.api.exceptions.CloudMineException;
 import com.cloudmine.api.exceptions.ConversionException;
 import com.cloudmine.api.rest.JsonUtilities;
+import com.cloudmine.api.rest.TransportableString;
 import com.cloudmine.api.rest.response.ResponseBase;
 import com.cloudmine.api.rest.response.SuccessErrorResponse;
 import org.slf4j.Logger;
@@ -21,7 +23,7 @@ import java.util.Map;
 public class SnippetArguments {
     private static final Logger LOG = LoggerFactory.getLogger(SnippetArguments.class);
     public static final String DATA_KEY = "data";
-    public static final String PARAMS_KEY = "params";
+    public static final String PARAMS_KEY = "params[params]";
     public static final String SESSION_TOKEN_KEY = "session_token";
     public static final String REQUEST_KEY = "request";
     private SnippetResponseConfiguration responseConfiguration;
@@ -34,6 +36,7 @@ public class SnippetArguments {
 
     /**
      * Get the configuration object for this snippet call
+     *
      * @return
      */
     public SnippetResponseConfiguration getResponseConfiguration() {
@@ -42,6 +45,7 @@ public class SnippetArguments {
 
     /**
      * Provides direct access to the arguments passed in. Use {@link #DATA_KEY} and {@link #PARAMS_KEY} to access the contents
+     *
      * @return a Map containing the arguments that were passed in
      */
     public Map<String, String> getArguments() {
@@ -50,6 +54,7 @@ public class SnippetArguments {
 
     /**
      * Get the data that was returned by the original call. If there was none, an empty string is returned
+     *
      * @return
      */
     public String getDataTransportableRepresentation() {
@@ -61,6 +66,7 @@ public class SnippetArguments {
 
     /**
      * Get the parameters that were passed into this snippet call. If there were none, an empty string is returned
+     *
      * @return
      */
     public String getParamsTransportableRepresentation() {
@@ -70,8 +76,20 @@ public class SnippetArguments {
                 params;
     }
 
+
+    public SimpleCMObject getParamsAsSimpleCMObject() {
+        try {
+            return new SimpleCMObject(new TransportableString(getParamsTransportableRepresentation()));
+        }catch (ConversionException ce) {
+            SimpleCMObject cmObject = new SimpleCMObject();
+            cmObject.add("errors", "Conversion exception");
+            return cmObject;
+        }
+    }
+
     /**
      * Attempts to return the session token. If there isn't one, {@link CMSessionToken.FAILED} is returned
+     *
      * @return
      */
     public CMSessionToken getSessionToken() {
@@ -79,13 +97,14 @@ public class SnippetArguments {
 
         try {
             return new CMSessionToken(sessionTokenJson);
-        } catch(ConversionException ce) {
+        } catch (ConversionException ce) {
             return CMSessionToken.FAILED;
         }
     }
 
     /**
      * Get the success part of the data
+     *
      * @return
      */
     public String getSuccessTransportableRepresentation() {
@@ -106,6 +125,7 @@ public class SnippetArguments {
 
     /**
      * Get the errors
+     *
      * @return
      */
     public String getErrorsTransportableRepresentation() {
@@ -119,7 +139,7 @@ public class SnippetArguments {
     public Map<String, CMObject> getSuccessDataObjects() throws ConversionException {
         Map<String, String> jsonMap = JsonUtilities.jsonMapToKeyMap(getDataTransportableRepresentation());
         String successResponse = jsonMap.get(SuccessErrorResponse.SUCCESS);
-        if(successResponse == null)
+        if (successResponse == null)
             throw new ConversionException("No success response returned");
         return CMObject.convertTransportableCollectionToObjectMap(successResponse);
     }
@@ -131,6 +151,7 @@ public class SnippetArguments {
      * If you request a different Response then would normally be used
      * for this data, this call may fail. It will also fail on File related response classes. If the call fails,
      * null will be returned. The response code will always be 200, no matter the actual server response
+     *
      * @param responseType The class of the response to construct
      * @param <T>
      * @return

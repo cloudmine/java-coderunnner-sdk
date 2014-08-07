@@ -1,9 +1,8 @@
-package com.cloudmine.coderunnerwrapper;
+package com.cloudmine.coderunner;
 
 import com.cloudmine.api.CMObject;
 import com.cloudmine.api.SimpleCMObject;
 import com.cloudmine.api.rest.response.CMObjectResponse;
-import com.cloudmine.coderunner.SnippetArguments;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -32,8 +31,8 @@ public class TestSnippetArguments {
         String data = "{\"success\":{\"objectId45435\":{\"topLevelKey\":\"stringValue\",\"intKey\":42,\"nested\":{\"key\":\"value\",\"deeper\":{\"nested\":true},\"boolean\":true},\"boolean\":true}},\"errors\":{}}";
         String params = null;
         Map<String, String> argumentMap = new HashMap<String, String>();
-        argumentMap.put("data", data);
-        argumentMap.put("params", params);
+        argumentMap.put(SnippetArguments.DATA_KEY, data);
+        argumentMap.put(SnippetArguments.PARAMS_KEY, params);
 
         return new SnippetArguments(null, argumentMap);
     }
@@ -43,7 +42,20 @@ public class TestSnippetArguments {
         SnippetArguments arguments = createSnippetArguments();
         CMObjectResponse response = arguments.getAsResponse(CMObjectResponse.class);
         assertNotNull(response);
-        SimpleCMObject object = (SimpleCMObject)response.getCMObject("objectId45435");
+        SimpleCMObject object = (SimpleCMObject) response.getCMObject("objectId45435");
         assertEquals("stringValue", object.getString("topLevelKey"));
+    }
+
+    @Test
+    public void testGetParams() {
+        Map<String, String> argumentMap = new HashMap<String, String>();
+        argumentMap.put(SnippetArguments.PARAMS_KEY, "{\"param1\":\"aString\", \"subObject\":{ \"number\":42, \"boolean\":true }, \"anotherString\": \"strange\" }");
+        SnippetArguments args = new SnippetArguments(new SnippetResponseConfiguration(), argumentMap);
+        SimpleCMObject params = args.getParamsAsSimpleCMObject();
+        assertEquals("aString", params.getString("param1"));
+        assertEquals("strange", params.getString("anotherString"));
+        SimpleCMObject subObject = params.getSimpleCMObject("subObject");
+        assertEquals(Integer.valueOf(42), subObject.getInteger("number"));
+        assertEquals(Boolean.TRUE, subObject.getBoolean("boolean"));
     }
 }
