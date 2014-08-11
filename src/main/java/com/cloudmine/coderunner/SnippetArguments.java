@@ -29,6 +29,10 @@ public class SnippetArguments {
     private SnippetResponseConfiguration responseConfiguration;
     private Map<String, String> arguments;
 
+    public SnippetArguments(Map<String, String> arguments) {
+        this(new SnippetResponseConfiguration(), arguments);
+    }
+
     public SnippetArguments(SnippetResponseConfiguration responseConfiguration, Map<String, String> arguments) {
         this.responseConfiguration = responseConfiguration;
         this.arguments = arguments;
@@ -66,7 +70,7 @@ public class SnippetArguments {
 
     /**
      * Get the parameters that were passed into this snippet call. If there were none, an empty string is returned
-     * Deprecated: Use {@link #getParamsAsSimpleCMObject(String)}
+     * Deprecated: Use {@link #getParamAsSimpleCMObject(String)}
      * @return
      */
     @Deprecated
@@ -77,17 +81,49 @@ public class SnippetArguments {
                 params;
     }
 
-    public String getParamsTransportableRepresentation(String paramName) {
+    public String getParamTransportableRepresentation(String paramName) {
         String params = arguments.get(PARAMS_KEY + "[" + paramName + "]");
         return params == null ?
                 "" :
                 params;
     }
 
+    public SimpleCMObject getParamsAsSimpleCMObject() {
+        SimpleCMObject simpleCMObject = new SimpleCMObject(false);
+        for(Map.Entry<String, String> params : arguments.entrySet()) {
+            String paramKey = params.getKey();
+            String strippedKey = paramKey.substring(PARAMS_KEY.length() + 1, paramKey.length() - 1);
+            String valueAsString = params.getValue();
+            Object value = null;
+            try {
+                value = JsonUtilities.jsonToClass(valueAsString);
+            }catch(Throwable t) {}
+            if(value == null) {
+                try {
+                    value = Integer.parseInt(valueAsString);
+                }catch(Throwable throwable) {}
+            }
+            if(value == null) {
+                try {
+                    value = Double.parseDouble(valueAsString);
+                }catch(Throwable throwable) {}
+            }
+            if(value == null) {
+                if("true".equalsIgnoreCase(valueAsString) || "false".equalsIgnoreCase(valueAsString)) {
+                    value = Boolean.parseBoolean(valueAsString);
+                }
+            }
+            if(value == null) {
+                value = valueAsString;
+            }
+            simpleCMObject.add(strippedKey, value);
+        }
+        return simpleCMObject;
+    }
 
-    public SimpleCMObject getParamsAsSimpleCMObject(String paramName) {
+    public SimpleCMObject getParamAsSimpleCMObject(String paramName) {
         try {
-            return new SimpleCMObject(new TransportableString(getParamsTransportableRepresentation(paramName)));
+            return new SimpleCMObject(new TransportableString(getParamTransportableRepresentation(paramName)));
         }catch (ConversionException ce) {
             SimpleCMObject cmObject = new SimpleCMObject();
             cmObject.add("errors", "Conversion exception");

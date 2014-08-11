@@ -51,11 +51,36 @@ public class TestSnippetArguments {
         Map<String, String> argumentMap = new HashMap<String, String>();
         argumentMap.put(SnippetArguments.PARAMS_KEY + "[obj]", "{\"param1\":\"aString\", \"subObject\":{ \"number\":42, \"boolean\":true }, \"anotherString\": \"strange\" }");
         SnippetArguments args = new SnippetArguments(new SnippetResponseConfiguration(), argumentMap);
-        SimpleCMObject params = args.getParamsAsSimpleCMObject("obj");
+        SimpleCMObject params = args.getParamAsSimpleCMObject("obj");
         assertEquals("aString", params.getString("param1"));
         assertEquals("strange", params.getString("anotherString"));
         SimpleCMObject subObject = params.getSimpleCMObject("subObject");
         assertEquals(Integer.valueOf(42), subObject.getInteger("number"));
         assertEquals(Boolean.TRUE, subObject.getBoolean("boolean"));
+    }
+
+    @Test
+    public void testGetParamsAsSimpleCMObject() {
+        Map<String, String> argumentMap = new HashMap<String, String>();
+        argumentMap.put(SnippetArguments.PARAMS_KEY + "[obj]","{\"param1\":\"aString\", \"subObject\":{ \"number\":42, \"boolean\":true }, \"anotherString\": \"strange\" }");
+        argumentMap.put(SnippetArguments.PARAMS_KEY + "[string]", "test string");
+        argumentMap.put(SnippetArguments.PARAMS_KEY + "[bool]", "true");
+        argumentMap.put(SnippetArguments.PARAMS_KEY + "[int]", "42");
+        argumentMap.put(SnippetArguments.PARAMS_KEY + "[double]", "4.2");
+
+        SnippetArguments args = new SnippetArguments(argumentMap);
+        SimpleCMObject paramObject = args.getParamsAsSimpleCMObject();
+        assertEquals("test string", paramObject.getString("string"));
+        assertEquals(true, paramObject.getBoolean("bool"));
+        assertEquals(42, paramObject.getInteger("int").intValue());
+        assertEquals(Double.valueOf(4.2), paramObject.getDouble("double"));
+
+        SimpleCMObject params = paramObject.getSimpleCMObject("obj");
+        assertEquals("aString", params.getString("param1"));
+        assertEquals("strange", params.getString("anotherString"));
+        SimpleCMObject subObject = params.getSimpleCMObject("subObject");
+        assertEquals(Integer.valueOf(42), subObject.getInteger("number"));
+        assertEquals(Boolean.TRUE, subObject.getBoolean("boolean"));
+
     }
 }
