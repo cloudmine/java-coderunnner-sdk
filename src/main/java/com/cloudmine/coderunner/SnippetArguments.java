@@ -23,7 +23,7 @@ import java.util.Map;
 public class SnippetArguments {
     private static final Logger LOG = LoggerFactory.getLogger(SnippetArguments.class);
     public static final String DATA_KEY = "data";
-    public static final String PARAMS_KEY = "params[params]";
+    public static final String PARAMS_KEY = "params";
     public static final String SESSION_TOKEN_KEY = "session_token";
     public static final String REQUEST_KEY = "request";
     private SnippetResponseConfiguration responseConfiguration;
@@ -66,9 +66,10 @@ public class SnippetArguments {
 
     /**
      * Get the parameters that were passed into this snippet call. If there were none, an empty string is returned
-     *
+     * Deprecated: Use {@link #getParamsAsSimpleCMObject(String)}
      * @return
      */
+    @Deprecated
     public String getParamsTransportableRepresentation() {
         String params = arguments.get(PARAMS_KEY);
         return params == null ?
@@ -76,10 +77,17 @@ public class SnippetArguments {
                 params;
     }
 
+    public String getParamsTransportableRepresentation(String paramName) {
+        String params = arguments.get(PARAMS_KEY + "[" + paramName + "]");
+        return params == null ?
+                "" :
+                params;
+    }
 
-    public SimpleCMObject getParamsAsSimpleCMObject() {
+
+    public SimpleCMObject getParamsAsSimpleCMObject(String paramName) {
         try {
-            return new SimpleCMObject(new TransportableString(getParamsTransportableRepresentation()));
+            return new SimpleCMObject(new TransportableString(getParamsTransportableRepresentation(paramName)));
         }catch (ConversionException ce) {
             SimpleCMObject cmObject = new SimpleCMObject();
             cmObject.add("errors", "Conversion exception");

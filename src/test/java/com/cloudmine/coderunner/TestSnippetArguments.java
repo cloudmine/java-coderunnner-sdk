@@ -49,9 +49,9 @@ public class TestSnippetArguments {
     @Test
     public void testGetParams() {
         Map<String, String> argumentMap = new HashMap<String, String>();
-        argumentMap.put(SnippetArguments.PARAMS_KEY, "{\"param1\":\"aString\", \"subObject\":{ \"number\":42, \"boolean\":true }, \"anotherString\": \"strange\" }");
+        argumentMap.put(SnippetArguments.PARAMS_KEY + "[obj]", "{\"param1\":\"aString\", \"subObject\":{ \"number\":42, \"boolean\":true }, \"anotherString\": \"strange\" }");
         SnippetArguments args = new SnippetArguments(new SnippetResponseConfiguration(), argumentMap);
-        SimpleCMObject params = args.getParamsAsSimpleCMObject();
+        SimpleCMObject params = args.getParamsAsSimpleCMObject("obj");
         assertEquals("aString", params.getString("param1"));
         assertEquals("strange", params.getString("anotherString"));
         SimpleCMObject subObject = params.getSimpleCMObject("subObject");
