@@ -24,14 +24,27 @@ import java.util.Map;
 public class SnippetArguments {
     private static final Logger LOG = LoggerFactory.getLogger(SnippetArguments.class);
     public static final String DATA_KEY = "data";
-    public static final String PARAMS_KEY = "params[params]";
+    public static final String PARAMS_KEY = "params";
     public static final String SESSION_TOKEN_KEY = "session_token";
+    public static final String BODY_KEY = "body";
     public static final String REQUEST_KEY = "request";
+    public static final String CONFIG_KEY = "config";
+    public static final String SESSION_KEY = "session";
+    public static final String METHOD_KEY = "method";
+    public static final String CONTENT_TYPE_KEY = "content-type";
+    public static final String USER_ID_KEY = "user_id";
+    public static final String API_KEY = "api_key";
+    public static final String APP_ID_KEY = "app_id";
+
     public static final int SESSION_TOKEN_VALID_TIME = 1209600000;
+
     private SnippetResponseConfiguration responseConfiguration;
     private Map<String, String> arguments;
 
     private SimpleCMObject inputJson;
+    public SnippetArguments(Map<String, String> arguments) {
+        this(new SnippetResponseConfiguration(), arguments);
+    }
 
     public SnippetArguments(SnippetResponseConfiguration responseConfiguration, Map<String, String> arguments) {
         this.responseConfiguration = responseConfiguration;
@@ -88,13 +101,14 @@ public class SnippetArguments {
 
     /**
      * Get the parameters that were passed into this snippet call. If there were none, an empty string is returned
-     *
+     * Deprecated: Use {@link #getParamAsSimpleCMObject(String)}
      * @return
      */
+    @Deprecated
     public String getParamsTransportableRepresentation() {
         if(isVersionTwo()) {
             try {
-                return inputJson.getSimpleCMObject("params").asUnkeyedObject();
+                return inputJson.getSimpleCMObject(PARAMS_KEY).asUnkeyedObject();
             }catch(Exception e){
                 return "";
             }
@@ -105,10 +119,59 @@ public class SnippetArguments {
                 params;
     }
 
+    public String getParamTransportableRepresentation(String paramName) {
+        if(isVersionTwo()) {
+            try {
+                return inputJson.getSimpleCMObject(PARAMS_KEY).get(paramName).toString();
+            }catch (Exception e) {
+                return "";
+            }
+        }
+        String params = arguments.get(PARAMS_KEY + "[" + paramName + "]");
+        return params == null ?
+                "" :
+                params;
+    }
 
     public SimpleCMObject getParamsAsSimpleCMObject() {
+        if(isVersionTwo()) {
+            return inputJson.getSimpleCMObject(PARAMS_KEY);
+        }
+        SimpleCMObject simpleCMObject = new SimpleCMObject(false);
+        for(Map.Entry<String, String> params : arguments.entrySet()) {
+            String paramKey = params.getKey();
+            String strippedKey = paramKey.substring(PARAMS_KEY.length() + 1, paramKey.length() - 1);
+            String valueAsString = params.getValue();
+            Object value = null;
+            try {
+                value = JsonUtilities.jsonToClass(valueAsString);
+            }catch(Throwable t) {}
+            if(value == null) {
+                try {
+                    value = Integer.parseInt(valueAsString);
+                }catch(Throwable throwable) {}
+            }
+            if(value == null) {
+                try {
+                    value = Double.parseDouble(valueAsString);
+                }catch(Throwable throwable) {}
+            }
+            if(value == null) {
+                if("true".equalsIgnoreCase(valueAsString) || "false".equalsIgnoreCase(valueAsString)) {
+                    value = Boolean.parseBoolean(valueAsString);
+                }
+            }
+            if(value == null) {
+                value = valueAsString;
+            }
+            simpleCMObject.add(strippedKey, value);
+        }
+        return simpleCMObject;
+    }
+
+    public SimpleCMObject getParamAsSimpleCMObject(String paramName) {
         try {
-            return new SimpleCMObject(new TransportableString(getParamsTransportableRepresentation()));
+            return new SimpleCMObject(new TransportableString(getParamTransportableRepresentation(paramName)));
         }catch (ConversionException ce) {
             SimpleCMObject cmObject = new SimpleCMObject();
             cmObject.add("errors", "Conversion exception");
@@ -124,7 +187,7 @@ public class SnippetArguments {
     public CMSessionToken getSessionToken() {
         if(isVersionTwo()) {
             try {
-                return new CMSessionToken(inputJson.getSimpleCMObject("session").getString("session_token", CMSessionToken.INVALID_TOKEN), new Date(System.currentTimeMillis() + SESSION_TOKEN_VALID_TIME));
+                return new CMSessionToken(inputJson.getSimpleCMObject(SESSION_KEY).getString(SESSION_TOKEN_KEY, CMSessionToken.INVALID_TOKEN), new Date(System.currentTimeMillis() + SESSION_TOKEN_VALID_TIME));
             }catch (Exception e) {
                 return CMSessionToken.FAILED;
             }
@@ -156,7 +219,7 @@ public class SnippetArguments {
         if(isVersionTwo()) {
             try {
                 SimpleCMObject request = inputJson.getSimpleCMObject(REQUEST_KEY);
-                Object requestData = request.getSimpleCMObject("body");
+                Object requestData = request.getSimpleCMObject(BODY_KEY);
                 return requestData.toString();
             }catch(Exception e) {
                 return "";
@@ -194,23 +257,23 @@ public class SnippetArguments {
      * @return
      */
     public SimpleCMObject getRequest() {
-        return inputJson.getSimpleCMObject("request");
+        return inputJson.getSimpleCMObject(REQUEST_KEY);
     }
 
     public SimpleCMObject getConfig() {
-        return inputJson.getSimpleCMObject("config");
+        return inputJson.getSimpleCMObject(CONFIG_KEY);
     }
 
     public SimpleCMObject getSession() {
-        return inputJson.getSimpleCMObject("session");
+        return inputJson.getSimpleCMObject(SESSION_KEY);
     }
 
     public String getRequestMethod() {
-        return getRequest().getString("method");
+        return getRequest().getString(METHOD_KEY);
     }
 
     public String getRequestContentType() {
-        return getRequest().getString("content-type");
+        return getRequest().getString(CONTENT_TYPE_KEY);
     }
 
     public String getSessionTokenString() {
@@ -218,16 +281,16 @@ public class SnippetArguments {
     }
 
     public String getUserId() {
-        return getSession().getString("user_id");
+        return getSession().getString(USER_ID_KEY);
     }
 
     public String getApiKey() {
-        return getSession().getString("api_key");
+        return getSession().getString(API_KEY);
 
     }
 
     public String getAppId() {
-        return getSession().getString("app_id");
+        return getSession().getString(APP_ID_KEY);
     }
 
     /**
