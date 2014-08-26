@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -26,12 +27,21 @@ public class SnippetArguments {
     public static final String PARAMS_KEY = "params[params]";
     public static final String SESSION_TOKEN_KEY = "session_token";
     public static final String REQUEST_KEY = "request";
+    public static final int SESSION_TOKEN_VALID_TIME = 1209600000;
     private SnippetResponseConfiguration responseConfiguration;
     private Map<String, String> arguments;
+
+    private SimpleCMObject inputJson;
 
     public SnippetArguments(SnippetResponseConfiguration responseConfiguration, Map<String, String> arguments) {
         this.responseConfiguration = responseConfiguration;
         this.arguments = arguments;
+    }
+
+    public SnippetArguments(SnippetResponseConfiguration responseConfiguration, String inputJson) {
+        this.inputJson = new SimpleCMObject(new TransportableString(inputJson));
+        this.responseConfiguration = responseConfiguration;
+        arguments = null;
     }
 
     /**
@@ -58,10 +68,22 @@ public class SnippetArguments {
      * @return
      */
     public String getDataTransportableRepresentation() {
+        if(isVersionTwo()) {
+            try {
+            SimpleCMObject response = inputJson.getSimpleCMObject("response");
+            return response.asUnkeyedObject();
+            }catch(Exception e) {
+                return "";
+            }
+        }
         String data = arguments.get(DATA_KEY);
         return data == null ?
                 "" :
                 data;
+    }
+
+    private boolean isVersionTwo() {
+        return arguments == null;
     }
 
     /**
@@ -70,6 +92,13 @@ public class SnippetArguments {
      * @return
      */
     public String getParamsTransportableRepresentation() {
+        if(isVersionTwo()) {
+            try {
+                return inputJson.getSimpleCMObject("params").asUnkeyedObject();
+            }catch(Exception e){
+                return "";
+            }
+        }
         String params = arguments.get(PARAMS_KEY);
         return params == null ?
                 "" :
@@ -93,6 +122,13 @@ public class SnippetArguments {
      * @return
      */
     public CMSessionToken getSessionToken() {
+        if(isVersionTwo()) {
+            try {
+                return new CMSessionToken(inputJson.getSimpleCMObject("session").getString("session_token", CMSessionToken.INVALID_TOKEN), new Date(System.currentTimeMillis() + SESSION_TOKEN_VALID_TIME));
+            }catch (Exception e) {
+                return CMSessionToken.FAILED;
+            }
+        }
         String sessionTokenJson = arguments.get(SESSION_TOKEN_KEY);
 
         try {
@@ -117,6 +153,15 @@ public class SnippetArguments {
     }
 
     public String getRequestDataTransportableRepresentation() {
+        if(isVersionTwo()) {
+            try {
+                SimpleCMObject request = inputJson.getSimpleCMObject(REQUEST_KEY);
+                Object requestData = request.getSimpleCMObject("body");
+                return requestData.toString();
+            }catch(Exception e) {
+                return "";
+            }
+        }
         String input = arguments.get(REQUEST_KEY);
         return input == null ?
                 "" :
