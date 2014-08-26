@@ -190,6 +190,47 @@ public class SnippetArguments {
     }
 
     /**
+     * Version 2 API only
+     * @return
+     */
+    public SimpleCMObject getRequest() {
+        return inputJson.getSimpleCMObject("request");
+    }
+
+    public SimpleCMObject getConfig() {
+        return inputJson.getSimpleCMObject("config");
+    }
+
+    public SimpleCMObject getSession() {
+        return inputJson.getSimpleCMObject("session");
+    }
+
+    public String getRequestMethod() {
+        return getRequest().getString("method");
+    }
+
+    public String getRequestContentType() {
+        return getRequest().getString("content-type");
+    }
+
+    public String getSessionTokenString() {
+        return getSessionToken().getSessionToken();
+    }
+
+    public String getUserId() {
+        return getSession().getString("user_id");
+    }
+
+    public String getApiKey() {
+        return getSession().getString("api_key");
+
+    }
+
+    public String getAppId() {
+        return getSession().getString("app_id");
+    }
+
+    /**
      * Get the snippet arguments as a response. <br>
      * This is useful if you always know that this snippet is going to be called during a specific type of request;
      * for example, if you know it will always be called during an object fetch request, you can pass in {@link com.cloudmine.api.rest.response.CMObjectResponse}

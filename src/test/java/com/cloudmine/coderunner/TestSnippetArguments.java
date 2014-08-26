@@ -67,7 +67,12 @@ public class TestSnippetArguments {
         String responseBody = "{\"success\":" + successValues + ",\"errors\":{},\"count\":10668,\"__id__\":\"body\",\"__access__\":[]}";
         String params = "{\"aString\":\"just\",\"bool\":true,\"int\":42";
         String sessionToken = "bWFyY0BjbG91ZG1pbmUubWU6cGFzc3dvcmQK";
-        String json = "{\"request\":{\"body\":" + requestBody + ",\"method\":\"POST\",\"content-type\":\"application/json\"},\"response\":{\"body\":" + responseBody + "},\"session\":{\"api_key\":\"64eda7d937be4d02b2cda117a4ad44e3\",\"app_id\":\"f5dc4d84d9c5400e9286352a6a072b5f\", \"session_token\": \"" + sessionToken + "\"},\"params\":" + params + "},\"config\":{\"async\":false,\"timeout\":30.0,\"version\":2,\"type\":\"post\"}}";
+        String apiKey = "64eda7d937be4d02b2cda117a4ad44e3";
+        String appId = "f5dc4d84d9c5400e9286352a6a072b5f";
+        String userId = "e38uhnj5w3nivet56";
+        String json = "{\"request\":{\"body\":" + requestBody + ",\"method\":\"POST\",\"content-type\":\"application/json\"},\"response\":{\"body\":" + responseBody + "}," +
+                "\"session\":{\"api_key\":\"" + apiKey + "\",\"app_id\":\"" + appId + "\", \"session_token\": \"" + sessionToken + "\", \"user_id\":\"" + userId + "\"}," +
+                "\"params\":" + params + "},\"config\":{\"async\":false,\"timeout\":30.0,\"version\":2,\"type\":\"post\"}}";
         SnippetArguments arguments = new SnippetArguments(new SnippetResponseConfiguration(), json);
         assertEquals(requestBody, arguments.getRequestDataTransportableRepresentation());
 
@@ -83,6 +88,18 @@ public class TestSnippetArguments {
         for(Map.Entry<String, CMObject> successObject : successObjects.entrySet()) {
             assertEquals(successObject.getValue().getObjectId(), response.getCMObject(successObject.getKey()).getObjectId());
         }
+
+        SimpleCMObject paramsObject = arguments.getParamsAsSimpleCMObject();
+        assertEquals("just", paramsObject.getString("aString"));
+        assertEquals(true, paramsObject.getBoolean("bool").booleanValue());
+        assertEquals(42, paramsObject.getInteger("int").intValue());
+
+        assertEquals("POST", arguments.getRequestMethod());
+        assertEquals("application/json", arguments.getRequestContentType());
+
+        assertEquals(appId, arguments.getAppId());
+        assertEquals(apiKey, arguments.getApiKey());
+        assertEquals(userId, arguments.getUserId());
 
     }
 }
