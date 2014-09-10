@@ -137,36 +137,8 @@ public class SnippetArguments {
         if(isVersionTwo()) {
             return inputJson.getSimpleCMObject(PARAMS_KEY);
         }
-        SimpleCMObject simpleCMObject = new SimpleCMObject(false);
-        for(Map.Entry<String, String> params : arguments.entrySet()) {
-            String paramKey = params.getKey();
-            String strippedKey = paramKey.substring(PARAMS_KEY.length() + 1, paramKey.length() - 1);
-            String valueAsString = params.getValue();
-            Object value = null;
-            try {
-                value = JsonUtilities.jsonToClass(valueAsString);
-            }catch(Throwable t) {}
-            if(value == null) {
-                try {
-                    value = Integer.parseInt(valueAsString);
-                }catch(Throwable throwable) {}
-            }
-            if(value == null) {
-                try {
-                    value = Double.parseDouble(valueAsString);
-                }catch(Throwable throwable) {}
-            }
-            if(value == null) {
-                if("true".equalsIgnoreCase(valueAsString) || "false".equalsIgnoreCase(valueAsString)) {
-                    value = Boolean.parseBoolean(valueAsString);
-                }
-            }
-            if(value == null) {
-                value = valueAsString;
-            }
-            simpleCMObject.add(strippedKey, value);
-        }
-        return simpleCMObject;
+        //This method doesn't exist for V1 api
+        return null;
     }
 
     public SimpleCMObject getParamAsSimpleCMObject(String paramName) {
