@@ -81,7 +81,7 @@ public class SnippetArguments {
      * @return
      */
     public String getDataTransportableRepresentation() {
-        if(isVersionTwo()) {
+        if(hasInputJson()) {
             try {
             SimpleCMObject response = inputJson.getSimpleCMObject("response");
             return response.asUnkeyedObject();
@@ -95,8 +95,8 @@ public class SnippetArguments {
                 data;
     }
 
-    private boolean isVersionTwo() {
-        return arguments == null;
+    private boolean hasInputJson() {
+        return inputJson != null;
     }
 
     /**
@@ -106,7 +106,7 @@ public class SnippetArguments {
      */
     @Deprecated
     public String getParamsTransportableRepresentation() {
-        if(isVersionTwo()) {
+        if(hasInputJson()) {
             try {
                 return inputJson.getSimpleCMObject(PARAMS_KEY).asUnkeyedObject();
             }catch(Exception e){
@@ -120,7 +120,7 @@ public class SnippetArguments {
     }
 
     public String getParamTransportableRepresentation(String paramName) {
-        if(isVersionTwo()) {
+        if(hasInputJson()) {
             try {
                 return inputJson.getSimpleCMObject(PARAMS_KEY).get(paramName).toString();
             }catch (Exception e) {
@@ -134,7 +134,7 @@ public class SnippetArguments {
     }
 
     public SimpleCMObject getParamsAsSimpleCMObject() {
-        if(isVersionTwo()) {
+        if(hasInputJson()) {
             return inputJson.getSimpleCMObject(PARAMS_KEY);
         }
         //This method doesn't exist for V1 api
@@ -157,7 +157,7 @@ public class SnippetArguments {
      * @return
      */
     public CMSessionToken getSessionToken() {
-        if(isVersionTwo()) {
+        if(hasInputJson()) {
             try {
                 return new CMSessionToken(inputJson.getSimpleCMObject(SESSION_KEY).getString(SESSION_TOKEN_KEY, CMSessionToken.INVALID_TOKEN), new Date(System.currentTimeMillis() + SESSION_TOKEN_VALID_TIME));
             }catch (Exception e) {
@@ -188,7 +188,7 @@ public class SnippetArguments {
     }
 
     public String getRequestDataTransportableRepresentation() {
-        if(isVersionTwo()) {
+        if(hasInputJson()) {
             try {
                 SimpleCMObject request = inputJson.getSimpleCMObject(REQUEST_KEY);
                 Object requestData = request.getSimpleCMObject(BODY_KEY);
